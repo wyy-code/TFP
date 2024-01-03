@@ -54,11 +54,18 @@ if model != "TransEdge":
         emb_path = "Embeddings/RSN/%s" % dataset
         ent_emb = tf.cast(np.load(emb_path + "ent_emb.npy"), "float32")
         ent_dic, rel_dic = json.load(open(emb_path + "ent_id2id.json")), json.load(open(emb_path + "rel_id2id.json"))
-        new_train, new_test = [], []
-        for a, b in test_pair:
-            new_test.append([int(ent_dic[str(a)]), int(ent_dic[str(b)])])
-        test_pair = np.array(new_test)
+        sort_key = []
+        sort_value = []
+        for i in range(ent_emb.shape[0]):
+            sort_key.append(i)
+        for i in sort_key:
+            sort_value.append(int(ent_dic[str(i)]))
+
+        ent_emb = ent_emb.numpy()[sort_value]
+        ent_emb = tf.cast(ent_emb, "float32")
+
         print("RSN")
+
     else:
         ent_emb = tf.cast(np.load("Embeddings/Dual_AMN/%sent_emb.npy" % dataset), "float32")
         print("Dual_AMN")
@@ -154,7 +161,7 @@ def get_features(train_pair, extra_feature=None):
     return features
 
 
-epochs = 0
+epochs = 1
 for epoch in range(epochs):
     print("Round %d start:" % (epoch + 1))
     s_features = get_features(train_pair)
