@@ -27,7 +27,7 @@ for gpu in gpus:
 
 # choose the base model and dataset
 model = ["Dual_AMN", "TransEdge", "RSN"][2]
-dataset = ["DBP_ZH_EN/", "DBP_JA_EN/", "DBP_FR_EN/", "SRPRS_FR_EN/", "SRPRS_DE_EN/"][0]
+dataset = ["DBP_ZH_EN/", "DBP_JA_EN/", "DBP_FR_EN/", "SRPRS_FR_EN/", "SRPRS_DE_EN/"][1]
 
 if "DBP" in dataset:
     path = "./EA_datasets/" + ("sharing/" if model == "TransEdge" else "mapping/") + dataset + "0_3/"
@@ -50,36 +50,21 @@ with open(path + "triples_2") as f:
         triples.append([h, t, r + flag])
 
 if model != "TransEdge":
-    triples = np.array(triples)
-    triples = np.unique(triples, axis=0)
-    node_size, rel_size = np.max(triples[:, 0]) + 1, np.max(triples[:, 2]) + 1
-    triples = np.concatenate([triples, [(t, h, r + rel_size) for h, t, r in triples]], axis=0)
-    rel_size = rel_size * 2
-
     if model == "RSN":
         emb_path = "Embeddings/RSN/%s" % dataset
         ent_emb = tf.cast(np.load(emb_path + "ent_emb.npy"), "float32")
         ent_dic, rel_dic = json.load(open(emb_path + "ent_id2id.json")), json.load(open(emb_path + "rel_id2id.json"))
-        new_triples, new_test = [], []
-        for h, t, r in triples:
-            new_triples.append([int(ent_dic[str(h)]), int(ent_dic[str(t)]), int(rel_dic[str(r)])])
+        new_train, new_test = [], []
         for a, b in test_pair:
             new_test.append([int(ent_dic[str(a)]), int(ent_dic[str(b)])])
-        triples = np.array(new_triples)
         test_pair = np.array(new_test)
+        print("RSN")
     else:
-        triples = np.concatenate([triples, [(t, t, 0) for t in range(node_size)]], axis=0)
         ent_emb = tf.cast(np.load("Embeddings/Dual_AMN/%sent_emb.npy" % dataset), "float32")
-
-    triples = np.unique(triples, axis=0)
-
+        print("Dual_AMN")
 else:
-    triples = np.array(triples)
-    triples = np.unique(triples, axis=0)
-    node_size, rel_size = np.max(triples) + 1, np.max(triples[:, 2]) + 1
-    triples = np.concatenate([triples, [(t, h, r) for h, t, r in triples]], axis=0)
-    triples = np.unique(triples, axis=0)
     ent_emb = tf.cast(np.load("Embeddings/TransEdge/%sent_embeds.npy" % dataset), "float32")
+    print("TransEdge")
 
 
 # decoding algorithm
@@ -169,14 +154,14 @@ def get_features(train_pair, extra_feature=None):
     return features
 
 
-epochs = 3
+epochs = 0
 for epoch in range(epochs):
     print("Round %d start:" % (epoch + 1))
     s_features = get_features(train_pair)
     l_features = get_features(train_pair, extra_feature=ent_emb)
 
-    # features = np.concatenate([s_features, l_features], -1)
-    features = s_features
+    features = np.concatenate([s_features, l_features], -1)
+    # features = s_features
 
     if epoch < epochs - 1:
         left, right = list(candidates_x), list(candidates_y)
