@@ -1,6 +1,5 @@
 from tensorflow import keras
 import numpy as np
-import numba as nb
 from utils import *
 from tqdm import *
 import tensorflow as tf
