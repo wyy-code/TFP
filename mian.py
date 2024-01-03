@@ -11,7 +11,7 @@ import json
 import os
 import faiss
 
-
+import sinkhorn_scale as skp
 import scipy.sparse as sp
 
 seed = 10086
@@ -26,8 +26,8 @@ for gpu in gpus:
     tf.config.experimental.set_memory_growth(gpu, True)
 
 # choose the base model and dataset
-model = ["Dual_AMN", "TransEdge", "RSN"][2]
-dataset = ["DBP_ZH_EN/", "DBP_JA_EN/", "DBP_FR_EN/", "SRPRS_FR_EN/", "SRPRS_DE_EN/"][1]
+model = ["Dual_AMN", "TransEdge", "RSN"][0]
+dataset = ["DBP_ZH_EN/", "DBP_JA_EN/", "DBP_FR_EN/", "SRPRS_FR_EN/", "SRPRS_DE_EN/"][0]
 
 if "DBP" in dataset:
     path = "./EA_datasets/" + ("sharing/" if model == "TransEdge" else "mapping/") + dataset + "0_3/"
@@ -35,19 +35,6 @@ else:
     path = "./EA_datasets/" + ("sharing/" if model == "TransEdge" else "mapping/") + dataset
 
 train_pair, test_pair = load_aligned_pair(path, ratio=0.3)
-
-# build the adjacency sparse tensor of KGs and load the initial embeddings
-triples = []
-
-flag = model == "Dual_AMN"
-with open(path + "triples_1") as f:
-    for line in f.readlines():
-        h, r, t = [int(x) for x in line.strip().split("\t")]
-        triples.append([h, t, r + flag])
-with open(path + "triples_2") as f:
-    for line in f.readlines():
-        h, r, t = [int(x) for x in line.strip().split("\t")]
-        triples.append([h, t, r + flag])
 
 if model != "TransEdge":
     if model == "RSN":
@@ -82,8 +69,6 @@ else:
     rel_dim, mini_dim = ent_dim // 3, 16
 
 node_size, rel_size, ent_tuple, triples_idx, ent_ent, ent_ent_val, rel_ent, ent_rel = load_graph(path)
-candidates_x,candidates_y = set([x for x,y in test_pair]), set([y for x,y in test_pair])
-
 
 def get_features(train_pair, extra_feature=None):
     if extra_feature is not None:
@@ -160,55 +145,22 @@ def get_features(train_pair, extra_feature=None):
         features = np.concatenate([ent_feature, features], axis=-1)
     return features
 
+print("Begin to Triple Feature Propagate:")
+# s_features = get_features(train_pair)
+l_features = get_features(train_pair, extra_feature=ent_emb)
 
-epochs = 1
-for epoch in range(epochs):
-    print("Round %d start:" % (epoch + 1))
-    s_features = get_features(train_pair)
-    l_features = get_features(train_pair, extra_feature=ent_emb)
+# features = np.concatenate([s_features, l_features], -1)
+features = l_features
 
-    features = np.concatenate([s_features, l_features], -1)
-    # features = s_features
-
-    if epoch < epochs - 1:
-        left, right = list(candidates_x), list(candidates_y)
-        index, sims = sparse_sinkhorn_sims(left, right, features, top_k)
-        ranks = tf.argsort(-sims, -1).numpy()
-        sims = sims.numpy();
-        index = index.numpy()
-
-        temp_pair = []
-        x_list, y_list = list(candidates_x), list(candidates_y)
-        for i in range(ranks.shape[0]):
-            if sims[i, ranks[i, 0]] > 0.9:
-                x = x_list[i]
-                y = y_list[index[i, ranks[i, 0]]]
-                temp_pair.append((x, y))
-
-        for x, y in temp_pair:
-            if x in candidates_x:
-                candidates_x.remove(x);
-            if y in candidates_y:
-                candidates_y.remove(y);
-
-        print("new generated pairs = %d" % (len(temp_pair)))
-        print("rest pairs = %d" % (len(candidates_x)))
-
-        if not len(temp_pair):
-            break
-        train_pair = np.concatenate([train_pair, np.array(temp_pair)])
-
-    # right_list, wrong_list = test(test_pair, features, top_k)
-
-    sims = cal_sims(test_pair,features)
-    sims = tf.exp(sims/0.02)
-    print("Begin to scale the sim...")
-    # sk = skp.SinkhornKnopp()
-    # sims = sk.fit(sims)
-    for k in range(15):
-        sims = sims / tf.reduce_sum(sims,axis=1,keepdims=True)
-        sims = sims / tf.reduce_sum(sims,axis=0,keepdims=True)
-    test(sims,"sinkhorn")
+sims = cal_sims(test_pair,features)
+sims = tf.exp(sims/0.02).numpy()
+print("Begin to scale the sim...")
+sk = skp.SinkhornKnoppTorchGPU()
+sims = sk.fit(sims)
+for k in range(15):
+    sims = sims / tf.reduce_sum(sims,axis=1,keepdims=True)
+    sims = sims / tf.reduce_sum(sims,axis=0,keepdims=True)
+test(sims,"sinkhorn")
 
 # the results of base model
 csls_sims(test_pair,ent_emb)
