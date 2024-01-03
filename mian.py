@@ -61,7 +61,6 @@ if model != "TransEdge":
         print(test_pair)
         all_pair = np.concatenate((train_pair, test_pair))
         print(all_pair)
-        exit()
         emb_path = "Embeddings/RSN/%s" % dataset
         ent_emb = tf.cast(np.load(emb_path + "ent_emb.npy"), "float32")
         rel_emb = tf.cast(np.load(emb_path + "rel_emb.npy"), "float32")
