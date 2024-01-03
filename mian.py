@@ -26,7 +26,7 @@ for gpu in gpus:
     tf.config.experimental.set_memory_growth(gpu, True)
 
 # choose the base model and dataset
-model = ["Dual_AMN", "TransEdge", "RSN"][0]
+model = ["Dual_AMN", "TransEdge", "RSN"][2]
 dataset = ["DBP_ZH_EN/", "DBP_JA_EN/", "DBP_FR_EN/", "SRPRS_FR_EN/", "SRPRS_DE_EN/"][0]
 
 if "DBP" in dataset:
@@ -57,13 +57,8 @@ if model != "TransEdge":
     rel_size = rel_size * 2
 
     if model == "RSN":
-        print(train_pair)
-        print(test_pair)
-        all_pair = np.concatenate((train_pair, test_pair))
-        print(all_pair)
         emb_path = "Embeddings/RSN/%s" % dataset
         ent_emb = tf.cast(np.load(emb_path + "ent_emb.npy"), "float32")
-        rel_emb = tf.cast(np.load(emb_path + "rel_emb.npy"), "float32")
         ent_dic, rel_dic = json.load(open(emb_path + "ent_id2id.json")), json.load(open(emb_path + "rel_id2id.json"))
         new_triples, new_test = [], []
         for h, t, r in triples:
@@ -75,7 +70,6 @@ if model != "TransEdge":
     else:
         triples = np.concatenate([triples, [(t, t, 0) for t in range(node_size)]], axis=0)
         ent_emb = tf.cast(np.load("Embeddings/Dual_AMN/%sent_emb.npy" % dataset), "float32")
-        rel_emb = tf.cast(np.load("Embeddings/Dual_AMN/%srel_emb.npy" % dataset), "float32")
 
     triples = np.unique(triples, axis=0)
 
@@ -86,7 +80,6 @@ else:
     triples = np.concatenate([triples, [(t, h, r) for h, t, r in triples]], axis=0)
     triples = np.unique(triples, axis=0)
     ent_emb = tf.cast(np.load("Embeddings/TransEdge/%sent_embeds.npy" % dataset), "float32")
-    rel_emb = tf.cast(np.load("Embeddings/TransEdge/%srel_embeds.npy" % dataset), "float32")
 
 
 # decoding algorithm
@@ -121,10 +114,6 @@ def get_features(train_pair, extra_feature=None):
     ent_rel_graph = normalize_adj(ent_rel_graph)
     ent_rel_graph = convert_sparse_matrix_to_sparse_tensor(ent_rel_graph)
 
-    # # ########Origin graph
-    # ent_ent_graph = tf.SparseTensor(indices=ent_ent, values=ent_ent_val, dense_shape=(node_size, node_size))
-    # rel_ent_graph = tf.SparseTensor(indices=rel_ent, values=K.ones(rel_ent.shape[0]), dense_shape=(rel_size, node_size))
-    # ent_rel_graph = tf.SparseTensor(indices=ent_rel, values=K.ones(ent_rel.shape[0]), dense_shape=(node_size, rel_size))
 
 
     ent_list, rel_list = [ent_feature], [rel_feature]
@@ -186,7 +175,8 @@ for epoch in range(epochs):
     s_features = get_features(train_pair)
     l_features = get_features(train_pair, extra_feature=ent_emb)
 
-    features = np.concatenate([s_features, l_features], -1)
+    # features = np.concatenate([s_features, l_features], -1)
+    features = s_features
 
     if epoch < epochs - 1:
         left, right = list(candidates_x), list(candidates_y)
