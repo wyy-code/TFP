@@ -11,7 +11,6 @@ import json
 import os
 import faiss
 
-import sinkhorn_scale as skp
 import scipy.sparse as sp
 
 seed = 10086
@@ -52,14 +51,12 @@ if model != "TransEdge":
         ent_emb = tf.cast(ent_emb, "float32")
 
         print("RSN")
-
     else:
         ent_emb = tf.cast(np.load("Embeddings/Dual_AMN/%sent_emb.npy" % dataset), "float32")
         print("Dual_AMN")
 else:
     ent_emb = tf.cast(np.load("Embeddings/TransEdge/%sent_embeds.npy" % dataset), "float32")
     print("TransEdge")
-
 
 # decoding algorithm
 ent_dim, depth, top_k = 1024, 2, 500
@@ -91,30 +88,23 @@ def get_features(train_pair, extra_feature=None):
     ent_rel_graph = normalize_adj(ent_rel_graph)
     ent_rel_graph = convert_sparse_matrix_to_sparse_tensor(ent_rel_graph)
 
-
-
     ent_list, rel_list = [ent_feature], [rel_feature]
-    for i in range(1): # origin iteration is 2.
+    for i in range(11): # Dual-AMN iteration: 11:81.59, 12:81.62, 13:81.6, .
         new_rel_feature = batch_sparse_matmul(rel_ent_graph, ent_feature)
         new_rel_feature = tf.nn.l2_normalize(new_rel_feature, axis=-1)
 
-        if extra_feature is not None:
-            new_ent_feature = batch_sparse_matmul(ent_ent_graph, ent_feature)
-            new_ent_feature = new_ent_feature.numpy()
-            ori_feature = extra_feature.numpy()
-            new_ent_feature[train_pair[:, 0]] = ori_feature[train_pair[:, 0]]
-            new_ent_feature[train_pair[:, 1]] = ori_feature[train_pair[:, 1]]
-            new_ent_feature += batch_sparse_matmul(ent_rel_graph, rel_feature)
-        else:
-            new_ent_feature = batch_sparse_matmul(ent_ent_graph, ent_feature)
-            new_ent_feature += batch_sparse_matmul(ent_rel_graph, rel_feature)
-
+        new_ent_feature = batch_sparse_matmul(ent_ent_graph, ent_feature)
+        new_ent_feature = new_ent_feature.numpy()
+        ori_feature = extra_feature.numpy()
+        new_ent_feature[train_pair[:, 0]] = ori_feature[train_pair[:, 0]]
+        new_ent_feature[train_pair[:, 1]] = ori_feature[train_pair[:, 1]]
+        new_ent_feature += batch_sparse_matmul(ent_rel_graph, rel_feature)
 
         new_ent_feature = tf.nn.l2_normalize(new_ent_feature, axis=-1)
 
-        ent_feature = new_ent_feature;
+        ent_feature = new_ent_feature
         rel_feature = new_rel_feature
-        ent_list.append(ent_feature);
+        ent_list.append(ent_feature)
         rel_list.append(rel_feature)
 
     ent_feature = K.l2_normalize(K.concatenate(ent_list, 1), -1)
@@ -146,17 +136,11 @@ def get_features(train_pair, extra_feature=None):
     return features
 
 print("Begin to Triple Feature Propagate:")
-# s_features = get_features(train_pair)
-l_features = get_features(train_pair, extra_feature=ent_emb)
-
-# features = np.concatenate([s_features, l_features], -1)
-features = l_features
+features = get_features(train_pair, extra_feature=ent_emb)
 
 sims = cal_sims(test_pair,features)
-sims = tf.exp(sims/0.02).numpy()
-print("Begin to scale the sim...")
-sk = skp.SinkhornKnoppTorchGPU()
-sims = sk.fit(sims)
+sims = tf.exp(sims/0.02)
+
 for k in range(15):
     sims = sims / tf.reduce_sum(sims,axis=1,keepdims=True)
     sims = sims / tf.reduce_sum(sims,axis=0,keepdims=True)
