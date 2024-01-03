@@ -1,8 +1,5 @@
 # _*_ coding:utf-8 _*_
 import numpy as np
-from sklearn.decomposition import TruncatedSVD
-from tqdm import tqdm
-from scipy import optimize
 import tensorflow as tf
 import tensorflow.keras.backend as K
 from utils import *
@@ -25,8 +22,8 @@ for gpu in gpus:
     tf.config.experimental.set_memory_growth(gpu, True)
 
 # choose the base model and dataset
-model = ["Dual_AMN", "TransEdge", "RSN"][0]
-dataset = ["DBP_ZH_EN/", "DBP_JA_EN/", "DBP_FR_EN/", "SRPRS_FR_EN/", "SRPRS_DE_EN/"][0]
+model = ["Dual_AMN", "TransEdge", "RSN"][2]
+dataset = ["DBP_ZH_EN/", "DBP_JA_EN/", "DBP_FR_EN/", "SRPRS_FR_EN/", "SRPRS_DE_EN/"][3]
 
 if "DBP" in dataset:
     path = "./EA_datasets/" + ("sharing/" if model == "TransEdge" else "mapping/") + dataset + "0_3/"
@@ -67,13 +64,10 @@ else:
 
 node_size, rel_size, ent_tuple, triples_idx, ent_ent, ent_ent_val, rel_ent, ent_rel = load_graph(path)
 
-def get_features(train_pair, extra_feature=None):
-    if extra_feature is not None:
-        ent_feature = extra_feature
-    else:
-        random_vec = K.l2_normalize(tf.random.normal((len(train_pair), ent_dim)), axis=-1)
-        ent_feature = tf.tensor_scatter_nd_update(tf.zeros((node_size, ent_dim)), train_pair.reshape((-1, 1)),
-                                                  tf.repeat(random_vec, 2, axis=0))
+def get_features(train_pair, initial_feature):
+
+    ent_feature = initial_feature
+
     rel_feature = tf.zeros((rel_size, ent_feature.shape[-1]))
 
     ent_ent_graph = sp.coo_matrix((ent_ent_val, ent_ent.transpose()), shape=(node_size, node_size))
@@ -89,13 +83,13 @@ def get_features(train_pair, extra_feature=None):
     ent_rel_graph = convert_sparse_matrix_to_sparse_tensor(ent_rel_graph)
 
     ent_list, rel_list = [ent_feature], [rel_feature]
-    for i in range(11): # Dual-AMN iteration: 11:81.59, 12:81.62, 13:81.6, .
+    for i in range(1): # Dual-AMN iteration: 11:81.59, 12:81.62, 13:81.6, .
         new_rel_feature = batch_sparse_matmul(rel_ent_graph, ent_feature)
         new_rel_feature = tf.nn.l2_normalize(new_rel_feature, axis=-1)
 
         new_ent_feature = batch_sparse_matmul(ent_ent_graph, ent_feature)
         new_ent_feature = new_ent_feature.numpy()
-        ori_feature = extra_feature.numpy()
+        ori_feature = initial_feature.numpy()
         new_ent_feature[train_pair[:, 0]] = ori_feature[train_pair[:, 0]]
         new_ent_feature[train_pair[:, 1]] = ori_feature[train_pair[:, 1]]
         new_ent_feature += batch_sparse_matmul(ent_rel_graph, rel_feature)
@@ -131,12 +125,12 @@ def get_features(train_pair, extra_feature=None):
     features = np.concatenate(features_list, axis=-1)
 
     faiss.normalize_L2(features)
-    if extra_feature is not None:
-        features = np.concatenate([ent_feature, features], axis=-1)
+    # features = ent_feature
+    features = np.concatenate([ent_feature, features], axis=-1)
     return features
 
 print("Begin to Triple Feature Propagate:")
-features = get_features(train_pair, extra_feature=ent_emb)
+features = get_features(train_pair, ent_emb)
 
 sims = cal_sims(test_pair,features)
 sims = tf.exp(sims/0.02)
