@@ -180,11 +180,11 @@ def get_features(train_pair, extra_feature=None):
     return features
 
 
-l_features = get_features(train_pair, extra_feature=ent_emb)
 epochs = 3
 for epoch in range(epochs):
     print("Round %d start:" % (epoch + 1))
     s_features = get_features(train_pair)
+    l_features = get_features(train_pair, extra_feature=ent_emb)
 
     features = np.concatenate([s_features, l_features], -1)
 
@@ -229,6 +229,4 @@ for epoch in range(epochs):
     test(sims,"sinkhorn")
 
 # the results of base model
-
-
 csls_sims(test_pair,ent_emb)
