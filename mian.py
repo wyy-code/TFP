@@ -125,7 +125,9 @@ def get_features(train_pair, initial_feature):
     features = np.concatenate(features_list, axis=-1)
 
     faiss.normalize_L2(features)
+    # ### Test the entity feature ####
     # features = ent_feature
+    # ### Test the reconstructed entity feature ####
     features = np.concatenate([ent_feature, features], axis=-1)
     return features
 
