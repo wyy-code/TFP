@@ -11,7 +11,7 @@ from TFP import TripleFeaturePropagation
 
 import scipy.sparse as sp
 
-seed = 10086
+seed = 123456
 np.random.seed(seed)
 
 # choose the GPU, "-1" represents using the CPU
@@ -31,7 +31,7 @@ if "DBP" in dataset:
 else:
     path = "./EA_datasets/" + ("sharing/" if model == "TransEdge" else "mapping/") + dataset
 
-train_pair, test_pair = load_aligned_pair(path, ratio=0.2)
+train_pair, test_pair = load_aligned_pair(path)
 
 if model != "TransEdge":
     if model == "RSN":
