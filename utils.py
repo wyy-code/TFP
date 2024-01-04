@@ -38,7 +38,7 @@ def load_triples(file_path,reverse = True):
     
     return all_triples, node_size, rel_size*2 if reverse else rel_size
 
-def load_aligned_pair(file_path,ratio = 0.3):
+def load_aligned_pair(file_path):
     with open(file_path + "ref_ent_ids") as f:
         ref = f.readlines()
     with open(file_path + "sup_ent_ids") as f:
