@@ -83,7 +83,7 @@ def get_features(train_pair, initial_feature):
     ent_rel_graph = convert_sparse_matrix_to_sparse_tensor(ent_rel_graph)
 
     ent_list, rel_list = [ent_feature], [rel_feature]
-    for i in range(1): # Dual-AMN iteration: 11:81.59, 12:81.62, 13:81.6, .
+    for i in range(10): # Dual-AMN iteration: 11:81.59, 12:81.62, 13:81.6, .
         new_rel_feature = batch_sparse_matmul(rel_ent_graph, ent_feature)
         new_rel_feature = tf.nn.l2_normalize(new_rel_feature, axis=-1)
 
