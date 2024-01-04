@@ -30,7 +30,7 @@ if "DBP" in dataset:
 else:
     path = "./EA_datasets/" + ("sharing/" if model == "TransEdge" else "mapping/") + dataset
 
-train_pair, test_pair = load_aligned_pair(path, ratio=0.3)
+train_pair, test_pair = load_aligned_pair(path, ratio=0.2)
 
 if model != "TransEdge":
     if model == "RSN":
@@ -89,11 +89,13 @@ def get_features(train_pair, initial_feature):
 
         new_ent_feature = batch_sparse_matmul(ent_ent_graph, ent_feature)
         new_ent_feature = new_ent_feature.numpy()
+
+        # ### Keeping stationary for aligned pairs ###
         ori_feature = initial_feature.numpy()
         new_ent_feature[train_pair[:, 0]] = ori_feature[train_pair[:, 0]]
         new_ent_feature[train_pair[:, 1]] = ori_feature[train_pair[:, 1]]
-        new_ent_feature += batch_sparse_matmul(ent_rel_graph, rel_feature)
 
+        new_ent_feature += batch_sparse_matmul(ent_rel_graph, rel_feature)
         new_ent_feature = tf.nn.l2_normalize(new_ent_feature, axis=-1)
 
         ent_feature = new_ent_feature
