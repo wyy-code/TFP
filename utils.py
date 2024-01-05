@@ -169,7 +169,6 @@ def sparse_sinkhorn_sims(left, right, features, top_k=500, iteration=15, mode="t
     faiss.normalize_L2(features_l);
     faiss.normalize_L2(features_r)
 
-    # res = faiss.StandardGpuResources()
     dim, measure = features_l.shape[1], faiss.METRIC_INNER_PRODUCT
     if mode == "test":
         param = 'Flat'
