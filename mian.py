@@ -23,7 +23,7 @@ for gpu in gpus:
     tf.config.experimental.set_memory_growth(gpu, True)
 
 # choose the base model and dataset
-model = ["Dual_AMN", "RSN", "AlignE", "BootEA", "GCN-Align", "MRAEA"][2]
+model = ["Dual_AMN", "RSN", "AlignE", "PEEA"][3]
 dataset = ["DBP_ZH_EN/", "DBP_JA_EN/", "DBP_FR_EN/", "SRPRS_FR_EN/", "SRPRS_DE_EN/"][0]
 
 if "DBP" in dataset:
@@ -53,7 +53,7 @@ elif model == "AlignE":
 
 else:
     ent_emb = tf.cast(np.load("Embeddings/Dual_AMN/%sent_emb.npy" % dataset), "float32")
-    print("Dual_AMN")
+    print("GNN-based")
 
 # decoding algorithm
 # Triple Feature Propagation based on the entity embedding
