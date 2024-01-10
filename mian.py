@@ -24,7 +24,7 @@ for gpu in gpus:
 
 # choose the base model and dataset
 model = ["Dual_AMN", "RSN", "AlignE", "BootEA", "GCN-Align", "MRAEA"][2]
-dataset = ["DBP_ZH_EN/", "DBP_JA_EN/", "DBP_FR_EN/", "SRPRS_FR_EN/", "SRPRS_DE_EN/"][4]
+dataset = ["DBP_ZH_EN/", "DBP_JA_EN/", "DBP_FR_EN/", "SRPRS_FR_EN/", "SRPRS_DE_EN/"][0]
 
 if "DBP" in dataset:
     path = "./EA_datasets/" + "mapping/" + dataset + "0_3/"
@@ -59,17 +59,17 @@ else:
 # Triple Feature Propagation based on the entity embedding
 node_size, rel_size, ent_tuple, triples_idx, ent_ent, ent_ent_val, rel_ent, ent_rel = load_graph(path)
 
-# print("Begin to Triple Feature Propagate:")
-# Triple_FP = TripleFeaturePropagation(train_pair, ent_emb)
-# features = Triple_FP.propagation(node_size, rel_size, ent_tuple, triples_idx, ent_ent, ent_ent_val, rel_ent, ent_rel)
-#
-# sims = cal_sims(test_pair,features)
-# sims = tf.exp(sims/0.02)
-#
-# for k in range(15):
-#     sims = sims / tf.reduce_sum(sims,axis=1,keepdims=True)
-#     sims = sims / tf.reduce_sum(sims,axis=0,keepdims=True)
-# test(sims,"sinkhorn")
+print("Begin to Triple Feature Propagate:")
+Triple_FP = TripleFeaturePropagation(train_pair, ent_emb)
+features = Triple_FP.propagation(node_size, rel_size, ent_tuple, triples_idx, ent_ent, ent_ent_val, rel_ent, ent_rel)
+
+sims = cal_sims(test_pair,features)
+sims = tf.exp(sims/0.02)
+
+for k in range(15):
+    sims = sims / tf.reduce_sum(sims,axis=1,keepdims=True)
+    sims = sims / tf.reduce_sum(sims,axis=0,keepdims=True)
+test(sims,"sinkhorn")
 
 # the results of base model
 csls_sims(test_pair,ent_emb)
