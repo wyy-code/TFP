@@ -23,13 +23,13 @@ for gpu in gpus:
     tf.config.experimental.set_memory_growth(gpu, True)
 
 # choose the base model and dataset
-model = ["Dual_AMN", "RSN", "AlignE", "PEEA"][3]
-dataset = ["DBP_ZH_EN/", "DBP_JA_EN/", "DBP_FR_EN/", "SRPRS_FR_EN/", "SRPRS_DE_EN/"][0]
+model = ["Dual_AMN", "RSN", "AlignE", "PEEA", "TransEdge", "RREA"][5]
+dataset = ["DBP_ZH_EN/", "DBP_JA_EN/", "DBP_FR_EN/", "SRPRS_FR_EN/", "SRPRS_DE_EN/"][4]
 
 if "DBP" in dataset:
-    path = "./EA_datasets/" + "mapping/" + dataset + "0_3/"
+    path = "./EA_datasets/" + ("sharing/" if model == "TransEdge" else "mapping/") + dataset + "0_3/"
 else:
-    path = "./EA_datasets/" + "mapping/" + dataset
+    path = "./EA_datasets/" + ("sharing/" if model == "TransEdge" else "mapping/") + dataset
 
 train_pair, test_pair = load_aligned_pair(path)
 
@@ -51,9 +51,25 @@ elif model == "AlignE":
     ent_emb = tf.cast(np.load("Embeddings/AlignE/%sent_emb.npy" % dataset), "float32")
     print("AlignE")
 
-else:
+elif model == "Dual_AMN":
     ent_emb = tf.cast(np.load("Embeddings/Dual_AMN/%sent_emb.npy" % dataset), "float32")
-    print("GNN-based")
+    print("Dual_AMN")
+
+elif model == "PEEA":
+    ent_emb = tf.cast(np.load("Embeddings/PEEA/%sent_emb.npy" % dataset), "float32")
+    print("PEEA")
+
+elif model == "TransEdge":
+    ent_emb = tf.cast(np.load("Embeddings/TransEdge/%sent_emb.npy" % dataset), "float32")
+    print("TransEdge")
+
+elif model == "RREA":
+    ent_emb = tf.cast(np.load("Embeddings/RREA/%sent_emb.npy" % dataset), "float32")
+    print("RREA")
+
+else:
+    print("The model is missed.")
+    exit()
 
 # decoding algorithm
 # Triple Feature Propagation based on the entity embedding
