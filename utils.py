@@ -273,3 +273,29 @@ def load_pre_features(dataset, vector_path, mode="word-level"):
         pre_feature = np.concatenate([ent_vec, char_vec], -1)
 
     return pre_feature
+
+
+def test(test_pair, features, top_k=500, iteration=15):
+    left, right = test_pair[:, 0], np.unique(test_pair[:, 1])
+    index, sims = sparse_sinkhorn_sims(left, right, features, top_k, iteration, "test")
+    ranks = tf.argsort(-sims, -1).numpy()
+    index = index.numpy()
+
+    wrong_list, right_list = [], []
+    h1, h10, mrr = 0, 0, 0
+    pos = np.zeros(np.max(right) + 1)
+    pos[right] = np.arange(len(right))
+    for i in range(len(test_pair)):
+        rank = np.where(pos[test_pair[i, 1]] == index[i, ranks[i]])[0]
+        if len(rank) != 0:
+            if rank[0] == 0:
+                h1 += 1
+                right_list.append(test_pair[i])
+            else:
+                wrong_list.append((test_pair[i], right[index[i, ranks[i]][0]]))
+            if rank[0] < 10:
+                h10 += 1
+            mrr += 1 / (rank[0] + 1)
+    print("Hits@1: %.4f Hits@10: %.4f MRR: %.4f\n" % (h1 / len(test_pair), h10 / len(test_pair), mrr / len(test_pair)))
+
+    return right_list, wrong_list
