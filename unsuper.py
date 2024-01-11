@@ -38,6 +38,7 @@ train_pair, test_pair = load_aligned_pair(path)
 # unzip this file and put "glove.6B.300d.txt" into the root of TFP
 
 ent_emb = load_pre_features(dataset,"./glove.6B.300d.txt",mode = "hybrid-level")
+ent_emb = tf.cast(ent_emb, "float32")
 
 # decoding algorithm
 # Triple Feature Propagation based on the entity embedding
