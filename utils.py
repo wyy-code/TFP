@@ -275,7 +275,7 @@ def load_pre_features(dataset, vector_path, mode="word-level"):
     return pre_feature
 
 
-def test(test_pair, features, top_k=500, iteration=15):
+def sink_test(test_pair, features, top_k=500, iteration=15):
     left, right = test_pair[:, 0], np.unique(test_pair[:, 1])
     index, sims = sparse_sinkhorn_sims(left, right, features, top_k, iteration, "test")
     ranks = tf.argsort(-sims, -1).numpy()
