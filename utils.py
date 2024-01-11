@@ -9,7 +9,7 @@ from evaluate import evaluate
 
 import scipy.sparse as sp
 from scipy.sparse import lil_matrix
-import tqdm
+from tqdm import tqdm
 import json
 
 def load_triples(file_path,reverse = True):
