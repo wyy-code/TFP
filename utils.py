@@ -9,6 +9,8 @@ from evaluate import evaluate
 
 import scipy.sparse as sp
 from scipy.sparse import lil_matrix
+import tqdm
+import json
 
 def load_triples(file_path,reverse = True):
     @nb.njit
@@ -215,3 +217,59 @@ def csls_sims(test_pair,feature):
     feature_a = tf.gather(indices=test_pair[:,0],params=feature)
     feature_b = tf.gather(indices=test_pair[:,1],params=feature)
     evaluater.test(feature_a,feature_b)
+
+
+def load_pre_features(dataset, vector_path, mode="word-level"):
+    try:
+        word_vecs = pickle.load(open("./word_vectors.pkl", "rb"))
+    except:
+        word_vecs = {}
+        with open(vector_path, encoding='UTF-8') as f:
+            for line in tqdm(f.readlines()):
+                line = line.split()
+                word_vecs[line[0]] = [float(x) for x in line[1:]]
+        pickle.dump(word_vecs, open("./word_vectors.pkl", "wb"))
+
+    if "EN" in dataset:
+        ent_names = json.load(open("translated_ent_name/%s.json" % dataset[:-1].lower(), "r"))
+
+    d = {}
+    count = 0
+    for _, name in ent_names:
+        for word in name:
+            word = word.lower()
+            for idx in range(len(word) - 1):
+                if word[idx:idx + 2] not in d:
+                    d[word[idx:idx + 2]] = count
+                    count += 1
+
+    ent_vec = np.zeros((len(ent_names), 300), "float32")
+    char_vec = np.zeros((len(ent_names), len(d)), "float32")
+    for i, name in tqdm(ent_names):
+        k = 0
+        for word in name:
+            word = word.lower()
+            if word in word_vecs:
+                ent_vec[i] += word_vecs[word]
+                k += 1
+            for idx in range(len(word) - 1):
+                char_vec[i, d[word[idx:idx + 2]]] += 1
+        if k:
+            ent_vec[i] /= k
+        else:
+            ent_vec[i] = np.random.random(300) - 0.5
+
+        if np.sum(char_vec[i]) == 0:
+            char_vec[i] = np.random.random(len(d)) - 0.5
+
+    faiss.normalize_L2(ent_vec)
+    faiss.normalize_L2(char_vec)
+
+    if mode == "word-level":
+        pre_feature = ent_vec
+    if mode == "char-level":
+        pre_feature = char_vec
+    if mode == "hybrid-level":
+        pre_feature = np.concatenate([ent_vec, char_vec], -1)
+
+    return pre_feature
