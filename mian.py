@@ -24,7 +24,7 @@ for gpu in gpus:
 
 # choose the base model and dataset
 model = ["Dual_AMN", "RSN", "AlignE", "MRAEA", "TransEdge", "RREA"][3]
-dataset = ["DBP_ZH_EN/", "DBP_JA_EN/", "DBP_FR_EN/", "SRPRS_FR_EN/", "SRPRS_DE_EN/"][3]
+dataset = ["DBP_ZH_EN/", "DBP_JA_EN/", "DBP_FR_EN/", "SRPRS_FR_EN/", "SRPRS_DE_EN/"][0]
 
 if "DBP" in dataset:
     path = "./EA_datasets/" + ("sharing/" if model == "TransEdge" else "mapping/") + dataset + "0_3/"
@@ -76,7 +76,7 @@ else:
 node_size, rel_size, ent_tuple, triples_idx, ent_ent, ent_ent_val, rel_ent, ent_rel = load_graph(path)
 
 print("Begin to Triple Feature Propagate:")
-Triple_FP = TripleFeaturePropagation(train_pair, ent_emb)
+Triple_FP = TripleFeaturePropagation(ent_emb, train_pair=train_pair)
 features = Triple_FP.propagation(node_size, rel_size, ent_tuple, triples_idx, ent_ent, ent_ent_val, rel_ent, ent_rel)
 
 sims = cal_sims(test_pair,features)
