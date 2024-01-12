@@ -11,12 +11,12 @@ import time
 
 class TripleFeaturePropagation:
 
-    def __init__(self, train_pair, initial_feature):
+    def __init__(self, initial_feature, train_pair=None):
         self.train_pair = train_pair
         self.initial_feature = initial_feature
 
     def propagation(self, node_size, rel_size, ent_tuple, triples_idx, ent_ent, ent_ent_val, rel_ent, ent_rel, rel_dim=512, mini_dim=16):
-        start_time = time.time()
+
         ent_feature = self.initial_feature
 
         rel_feature = tf.zeros((rel_size, ent_feature.shape[-1]))
@@ -34,7 +34,7 @@ class TripleFeaturePropagation:
         ent_rel_graph = convert_sparse_matrix_to_sparse_tensor(ent_rel_graph)
 
         ent_list, rel_list = [ent_feature], [rel_feature]
-
+        start_time = time.time()
         for i in range(1):  # Dual-AMN iteration: 11:81.59, 12:81.62, 13:81.6, .
             new_rel_feature = batch_sparse_matmul(rel_ent_graph, ent_feature)
             new_rel_feature = tf.nn.l2_normalize(new_rel_feature, axis=-1)
@@ -43,9 +43,10 @@ class TripleFeaturePropagation:
             new_ent_feature = new_ent_feature.numpy()
 
             # ### Keeping stationary for aligned pairs ###
-            ori_feature = self.initial_feature.numpy()
-            new_ent_feature[self.train_pair[:, 0]] = ori_feature[self.train_pair[:, 0]]
-            new_ent_feature[self.train_pair[:, 1]] = ori_feature[self.train_pair[:, 1]]
+            if self.train_pair.any():
+                ori_feature = self.initial_feature.numpy()
+                new_ent_feature[self.train_pair[:, 0]] = ori_feature[self.train_pair[:, 0]]
+                new_ent_feature[self.train_pair[:, 1]] = ori_feature[self.train_pair[:, 1]]
 
             new_ent_feature += batch_sparse_matmul(ent_rel_graph, rel_feature)
             new_ent_feature = tf.nn.l2_normalize(new_ent_feature, axis=-1)
