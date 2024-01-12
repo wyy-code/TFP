@@ -6,7 +6,7 @@ from utils import *
 import tensorly
 import json
 import os
-import faiss
+# import faiss
 from TFP import TripleFeaturePropagation
 
 import scipy.sparse as sp
@@ -23,7 +23,7 @@ for gpu in gpus:
     tf.config.experimental.set_memory_growth(gpu, True)
 
 # choose the base model and dataset
-model = ["Dual_AMN", "RSN", "AlignE", "MRAEA", "TransEdge", "RREA"][3]
+model = ["Dual_AMN", "RSN", "AlignE", "MRAEA", "TransEdge", "RREA"][1]
 dataset = ["DBP_ZH_EN/", "DBP_JA_EN/", "DBP_FR_EN/", "SRPRS_FR_EN/", "SRPRS_DE_EN/"][0]
 
 if "DBP" in dataset:
