@@ -23,8 +23,8 @@ for gpu in gpus:
     tf.config.experimental.set_memory_growth(gpu, True)
 
 # choose the base model and dataset
-model = ["Dual_AMN", "RSN", "AlignE", "MRAEA", "TransEdge", "RREA"][1]
-dataset = ["DBP_ZH_EN/", "DBP_JA_EN/", "DBP_FR_EN/", "SRPRS_FR_EN/", "SRPRS_DE_EN/"][0]
+model = ["Dual_AMN", "RSN", "AlignE", "MRAEA", "TransEdge", "RREA"][5]
+dataset = ["DBP_ZH_EN/", "DBP_JA_EN/", "DBP_FR_EN/", "SRPRS_FR_EN/", "SRPRS_DE_EN/"][2]
 
 if "DBP" in dataset:
     path = "./EA_datasets/" + ("sharing/" if model == "TransEdge" else "mapping/") + dataset + "0_3/"
@@ -70,6 +70,7 @@ elif model == "RREA":
 else:
     print("The model is missed.")
     exit()
+
 
 # decoding algorithm
 # Triple Feature Propagation based on the entity embedding
