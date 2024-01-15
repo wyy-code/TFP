@@ -1,9 +1,4 @@
-import numba as nb
-import numpy as np
-import faiss
-import tensorflow as tf
-import tensorflow.keras.backend as K
-import pickle# _*_ coding:utf-8 _*_
+# _*_ coding:utf-8 _*_
 import numpy as np
 import tensorflow as tf
 import tensorflow.keras.backend as K
@@ -65,6 +60,7 @@ class TripleFeaturePropagation:
         rel_feature = K.l2_normalize(K.concatenate(rel_list, 1), -1)
         rel_feature = random_projection(rel_feature, rel_dim)
 
+
         batch_size = ent_feature.shape[-1] // mini_dim
         sparse_graph = tf.SparseTensor(indices=triples_idx, values=K.ones(triples_idx.shape[0]),
                                        dense_shape=(np.max(triples_idx) + 1, rel_size))
@@ -84,7 +80,7 @@ class TripleFeaturePropagation:
                 features_list.append(K.concatenate(temp_list, -1).numpy())
         features = np.concatenate(features_list, axis=-1)
         faiss.normalize_L2(features)
-        print(time.time()-start_time)
+
         # ### Test the reconstructed entity feature ####
         features = np.concatenate([ent_feature, features], axis=-1)
         return features
