@@ -10,7 +10,7 @@ The dataset and the embedding we processed can be downloaded at [GoogleDrive](ht
 
 * ent_ids_2: ids for entities in target KG;
 
-rel_ids_1: ids for relations in source KG;
+*rel_ids_1: ids for relations in source KG;
 
 rel_ids_2: ids for relations in target KG;
 
