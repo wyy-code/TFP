@@ -19,12 +19,19 @@ The dataset and the embedding we processed can be downloaded at [GoogleDrive](ht
 ## Just run main.py
 
 ## Cite
-Please condiser citing this paper if you use the code or data from our work. Thanks a lot ~
+Please consider citing this paper if you use the code or data from our work. Thanks a lot ~
+
 >@misc{wang2024gradient,
+>
       title={Gradient Flow of Energy: A General and Efficient Approach for Entity Alignment Decoding}, 
+      
       author={Yuanyi Wang and Haifeng Sun and Jingyu Wang and Qi Qi and Shaoling Sun and Jianxin Liao},
+      
       year={2024},
+      
       eprint={2401.12798},
+      
       archivePrefix={arXiv},
+      
       primaryClass={cs.IR}
 }
