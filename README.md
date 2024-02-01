@@ -22,12 +22,10 @@ The dataset and the embedding we processed can be downloaded at [GoogleDrive](ht
 Please consider citing this paper if you use the code or data from our work. Thanks a lot ~
 
 ```bigquery
-@misc{wang2024gradient,
-      title={Gradient Flow of Energy: A General and Efficient Approach for Entity Alignment Decoding}, 
-      author={Yuanyi Wang and Haifeng Sun and Jingyu Wang and Qi Qi and Shaoling Sun and Jianxin Liao},
-      year={2024},
-      eprint={2401.12798},
-      archivePrefix={arXiv},
-      primaryClass={cs.IR}
+@article{wang2024gradient,
+  title={Gradient Flow of Energy: A General and Efficient Approach for Entity Alignment Decoding},
+  author={Wang, Yuanyi and Sun, Haifeng and Wang, Jingyu and Qi, Qi and Sun, Shaoling and Liao, Jianxin},
+  journal={arXiv preprint arXiv:2401.12798},
+  year={2024}
 }
 ```
