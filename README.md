@@ -1,6 +1,6 @@
 # Triple Feature Propagation (TFP)
 
-This is the code of Triple Feature Propagation (TFP) introduced in our paper: "Gradient Flow of Energy: A General and Efficient Approach for Entity Alignment Decoding".
+This is the code of Triple Feature Propagation (TFP) introduced in our paper: "Gradient Flow of Energy: A General and Efficient Approach for Entity Alignment Decoding".[arxiv](https://arxiv.org/abs/2401.12798)
 
 ## Datasets
 
