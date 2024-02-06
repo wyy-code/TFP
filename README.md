@@ -18,6 +18,13 @@ The dataset and the embedding we processed can be downloaded at [GoogleDrive](ht
 
 ## Just run main.py
 
+## Environment
+
+* tensorflow == 2.6.0
+* Python == 3.7.0
+* Numpy
+* tqdm
+
 ## Cite
 Please consider citing this paper if you use the code or data from our work. Thanks a lot ~
 
