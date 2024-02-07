@@ -4,7 +4,7 @@ This is the code of Triple Feature Propagation (TFP) introduced in our paper: "G
 
 ## Datasets
 
-The dataset and the embedding we processed can be downloaded at [GoogleDrive](https://drive.google.com/file/d/1wptKenCyYXvIfuNXjuE2dWmbHHkib3-5/view?usp=drive_link). You can also use the same embeddings and datasets in [DATTI](https://github.com/MaoXinn/DATTI).
+The dataset and the embedding we processed can be downloaded at [GoogleDrive](https://drive.google.com/file/d/1wptKenCyYXvIfuNXjuE2dWmbHHkib3-5/view?usp=drive_link). You can also use the same datasets in [DATTI](https://github.com/MaoXinn/DATTI).
 
 * ent_ids_1: ids for entities in source KG;
 * ent_ids_2: ids for entities in target KG;
