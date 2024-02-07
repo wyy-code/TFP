@@ -20,8 +20,8 @@ The dataset and the embedding we processed can be downloaded at [GoogleDrive](ht
 
 ## Environment
 
-* tensorflow == 2.6.0
 * Python == 3.7.0
+* tensorflow == 2.6.0
 * Numpy
 * tqdm
 
