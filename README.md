@@ -25,6 +25,7 @@ The dataset and the embedding we processed can be downloaded at [GoogleDrive](ht
 * Numpy
 * tqdm
 
+
 ## Acknoledgement
 
 We appreciate [DATTI](https://github.com/MaoXinn/DATTI) for their open-source contributions.
