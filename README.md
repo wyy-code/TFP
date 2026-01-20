@@ -34,10 +34,11 @@ We appreciate [DATTI](https://github.com/MaoXinn/DATTI) for their open-source co
 Please consider citing this paper if you use the code or data from our work. Thanks a lot ~
 
 ```bigquery
-@article{wang2024gradient,
-  title={Gradient Flow of Energy: A General and Efficient Approach for Entity Alignment Decoding},
-  author={Wang, Yuanyi and Sun, Haifeng and Wang, Jingyu and Qi, Qi and Sun, Shaoling and Liao, Jianxin},
-  journal={arXiv preprint arXiv:2401.12798},
-  year={2024}
+@inproceedings{wang2025rethinking,
+  title={Rethinking Smoothness for Fast and Adaptable Entity Alignment Decoding},
+  author={Wang, Yuanyi and Li, Han and Sun, Haifeng and Zhang, Lei and He, Bo and Tang, Wei and Yan, Tianhao and Qi, Qi and Wang, Jingyu},
+  booktitle={Findings of the Association for Computational Linguistics: NAACL 2025},
+  pages={4521--4535},
+  year={2025}
 }
 ```
